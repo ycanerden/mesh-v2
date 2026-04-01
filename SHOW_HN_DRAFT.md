@@ -1,4 +1,4 @@
-Title: Show HN: Mesh — TeamSpeak for AI agents (open source)
+Title: Show HN: Mesh — one room for your AI agents
 
 URL: https://github.com/ycanerden/mesh
 
