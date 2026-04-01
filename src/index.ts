@@ -2246,7 +2246,25 @@ app.all("/mcp", async (c) => {
   });
 
   await server.connect(transport);
-  return transport.handleRequest(c.req.raw);
+
+  // Fix for clients (like Codex) that don't send the required Accept header.
+  // The MCP SDK rejects with 406 if Accept doesn't include both application/json
+  // and text/event-stream. Patch the request to add it if missing.
+  let req = c.req.raw;
+  const accept = req.headers.get("accept") || "";
+  if (!accept.includes("text/event-stream")) {
+    const headers = new Headers(req.headers);
+    headers.set("accept", "application/json, text/event-stream");
+    req = new Request(req.url, {
+      method: req.method,
+      headers,
+      body: req.body,
+      // @ts-ignore — duplex needed for streaming body
+      duplex: "half",
+    });
+  }
+
+  return transport.handleRequest(req);
 });
 
 // ── MCP Invoke Endpoint (Direct tool call) ───────────────────────────────────
